@@ -10,7 +10,10 @@ permissions:
 
 jobs:
   build:
+    name: Build on ${{ matrix.os }}
+
     strategy:
+      fail-fast: false
       matrix:
         os:
           - macos-latest
@@ -20,7 +23,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -32,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build Electron app
         run: npm run build
 
       - name: Upload build artifact
@@ -40,8 +43,10 @@ jobs:
         with:
           name: ${{ matrix.os }}-build
           path: dist/
+          if-no-files-found: error
 
   release:
+    name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
 
@@ -49,16 +54,22 @@ jobs:
       - name: Download all builds
         uses: actions/download-artifact@v4
         with:
-          path: builds/
+          path: builds
 
-      - name: Create Release
+      - name: List downloaded files
+        run: find builds -type f
+
+      - name: Create release and upload installers
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
+          name: FileShare ${{ github.ref_name }}
+          generate_release_notes: true
           files: |
-            builds/**/*.zip
             builds/**/*.dmg
             builds/**/*.exe
             builds/**/*.AppImage
             builds/**/*.deb
+            builds/**/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

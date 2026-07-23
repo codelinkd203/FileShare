@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
+    name: Build ${{ matrix.os }}
 
     strategy:
       fail-fast: false
@@ -23,7 +23,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -46,7 +46,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: Create GitHub Release
+    name: Create Release
     needs: build
     runs-on: ubuntu-latest
 
@@ -56,10 +56,10 @@ jobs:
         with:
           path: builds
 
-      - name: List downloaded files
+      - name: Show downloaded files
         run: find builds -type f
 
-      - name: Create release and upload installers
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
@@ -69,7 +69,5 @@ jobs:
             builds/**/*.dmg
             builds/**/*.exe
             builds/**/*.AppImage
-            builds/**/*.deb
-            builds/**/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

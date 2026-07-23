@@ -1,29 +1,64 @@
 name: Build
 
 on:
-  workflow_dispatch:
   push:
     tags:
-      - 'v*'
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os:
+          - macos-latest
+          - windows-latest
+          - ubuntu-latest
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
-      - run: npm ci
-      - run: npm run build
+      - name: Install dependencies
+        run: npm ci
 
-      - uses: actions/upload-artifact@v4
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-build
           path: dist/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all builds
+        uses: actions/download-artifact@v4
+        with:
+          path: builds/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            builds/**/*.zip
+            builds/**/*.dmg
+            builds/**/*.exe
+            builds/**/*.AppImage
+            builds/**/*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

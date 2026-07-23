@@ -2,11 +2,12 @@
   "name": "fileshare",
   "version": "1.0.1",
   "description": "FileShare — instant wireless file transfer across any device, anywhere",
+  "author": "Eddie",
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
-    "build": "electron-builder"
+    "build": "electron-builder --publish never"
   },
   "dependencies": {
     "archiver": "^6.0.2",
@@ -29,7 +30,8 @@
     "appId": "com.fileshare.app",
     "productName": "FileShare",
     "mac": {
-      "category": "public.app-category.utilities"
+      "category": "public.app-category.utilities",
+      "target": "dmg"
     },
     "win": {
       "target": "nsis"

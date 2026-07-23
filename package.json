@@ -1,6 +1,6 @@
 {
   "name": "fileshare",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "FileShare — instant wireless file transfer across any device, anywhere",
   "main": "src/main/main.js",
   "scripts": {
